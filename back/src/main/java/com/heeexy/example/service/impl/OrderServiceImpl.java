@@ -1,18 +1,25 @@
 package com.heeexy.example.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.heeexy.example.dao.CartDao;
 import com.heeexy.example.dao.OrderDao;
 import com.heeexy.example.dao.OrderItemDao;
 import com.heeexy.example.dao.OrderUserDao;
+import com.heeexy.example.pojo.Cart;
 import com.heeexy.example.pojo.Order;
 import com.heeexy.example.pojo.OrderItem;
 import com.heeexy.example.pojo.OrderUser;
 import com.heeexy.example.service.OrderService;
+import com.heeexy.example.service.UserService;
 import com.heeexy.example.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -22,20 +29,19 @@ public class OrderServiceImpl implements OrderService {
     private OrderItemDao orderItemDao;
     @Autowired
     private OrderUserDao orderUserDao;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private CartDao cartDao;
 
     @Override
-    public JSONObject loadOrders(String username) {
-        QueryWrapper<OrderUser> qw1 = new QueryWrapper<>();
-        qw1.eq("user_name", username);
-        OrderUser orderUser = orderUserDao.selectOne(qw1);
-        QueryWrapper<Order> qw2 = new QueryWrapper<>();
-        qw2.eq("user_name", orderUser.getOuId());
-        Order order = orderDao.selectOne(qw2);
-        QueryWrapper<OrderItem> qw3 = new QueryWrapper<>();
-        qw3.eq("ot_id",order.getOrderItemId());
-        OrderItem orderItem = orderItemDao.selectOne(qw3);
-        order.setOrderItem(orderItem).setOrderUser(orderUser);
-        return CommonUtil.successJson(order);
+    public JSONObject loadCart(String userTicket) {
+        String wait_id = "在sys_user里找到跟dc_user关联的字段";
+        Long user_id = 1L; //从dc_user对象中找到user_id
+        QueryWrapper<Cart> qw = new QueryWrapper<>();
+        qw.eq("user_id",user_id);
+        List<Cart> carts = cartDao.selectList(qw);
+        return CommonUtil.successJson(carts);
     }
 
    /* @Override
@@ -48,31 +54,45 @@ public class OrderServiceImpl implements OrderService {
     }*/
 
     @Override
+    public JSONObject updateItemNum(JSONObject requestJson,String userTicket) {
+        String wait_id = "在sys_user里找到跟dc_user关联的字段";
+        Long user_id = 1L; //从dc_user对象中找到user_id
+        cartDao.updateItemNum(requestJson);
+        Long itemId = requestJson.getLong("item_id");
+        QueryWrapper<Cart> qw = new QueryWrapper<>();
+        qw.eq("item_id", itemId);
+        Cart cart = cartDao.selectOne(qw);
+        Long total = cart.getItemPrice()*cart.getItemNum();
+        return CommonUtil.successJson(total);
+    }
+
+
+    @Override
     public JSONObject submitOrder(JSONObject requestJson,String username) {
-        QueryWrapper<OrderUser> qw1 = new QueryWrapper<>();
-        qw1.eq("user_name", username);
-        OrderUser orderUser = orderUserDao.selectOne(qw1);
-        QueryWrapper<Order> qw2 = new QueryWrapper<>();
-        qw2.eq("user_name", orderUser.getOuId());
-        Order order = orderDao.selectOne(qw2);
-        String orderPayType = requestJson.getString("order_paytype");
-        order.setOrderPayType(orderPayType);
-        String orderNum = order.getOrderId()+""+order.getOrderUserId()+System.currentTimeMillis();
+        String wait_id = "在sys_user里找到跟dc_user关联的字段";
+        Long user_id = 1L; //从dc_user对象中找到user_id
+        Order order = new Order();
+        order.setOrderUserId(user_id);
+        String orderNum = user_id+""+System.currentTimeMillis();
         order.setOrderNum(orderNum);
-        orderDao.update(order,qw2);
+        orderDao.insert(order);
+
+        JSONArray cartsArr = requestJson.getJSONArray("cartList");
+        for(int i=0; i< cartsArr.size(); i++){
+            Cart cartTemp = (Cart) cartsArr.get(i);
+            OrderItem orderItem = new OrderItem();
+            orderItem.setItemId(cartTemp.getItemId());
+            orderItem.setItemName(cartTemp.getItemName());
+            orderItem.setItemNum(cartTemp.getItemNum());
+            orderItem.setItemPrice(cartTemp.getItemPrice());
+            orderItem.setOrderNum(orderNum);
+            orderItemDao.insert(orderItem);
+        }
+        QueryWrapper<OrderItem> qw = new QueryWrapper<>();
+        qw.eq("order_num",orderNum);
+        List<OrderItem> orderItems = orderItemDao.selectList(qw);
+        order.setOrderItems(orderItems);
         return CommonUtil.successJson(order);
     }
 
-    @Override
-    public JSONObject updateItemNum(JSONObject requestJson) {
-        OrderItem orderItem = requestJson.getObject("itemData", OrderItem.class);
-        Integer orderId = requestJson.getInteger("order_id");
-        QueryWrapper<Order> qw = new QueryWrapper<>();
-        qw.eq("order_id",orderId);
-        Order order = orderDao.selectOne(qw);
-        UpdateWrapper<OrderItem> uw = new UpdateWrapper<>();
-        uw.eq("ot_id", order.getOrderItemId());
-        orderItemDao.update(orderItem, uw);
-        return CommonUtil.successJson(order);
-    }
 }

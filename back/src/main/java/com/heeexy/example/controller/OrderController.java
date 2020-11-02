@@ -14,18 +14,27 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @GetMapping("/loadOrderList")
+    @GetMapping("/loadCartList")
     public JSONObject loadOrders(){
         Session session = SecurityUtils.getSubject().getSession();
         JSONObject userInfo = (JSONObject) session.getAttribute(Constants.SESSION_USER_INFO);
-        String username = userInfo.getString("username");
-        return orderService.loadOrders(username);
+        String userTicket = userInfo.getString("userId");
+        return orderService.loadCart(userTicket);
     }
 
    /* @PostMapping("/updatePayType")
     public JSONObject updatePayType(@RequestBody JSONObject requestJson){
         return orderService.updatePayType(requestJson);
     }*/
+
+    @PostMapping("/updateItemNum")
+    public JSONObject updateItemNum(@RequestBody JSONObject requestJson){
+        Session session = SecurityUtils.getSubject().getSession();
+        JSONObject userInfo = (JSONObject) session.getAttribute(Constants.SESSION_USER_INFO);
+        String userTicket = userInfo.getString("wait_id");
+        return orderService.updateItemNum(requestJson,userTicket);
+    }
+
 
     @PostMapping("/submitOrder")
     public JSONObject submitOrder(@RequestBody JSONObject requestJson){
@@ -35,10 +44,6 @@ public class OrderController {
         return orderService.submitOrder(requestJson,username);
     }
 
-    @PostMapping("/updateItemNum")
-    public JSONObject updateItemNum(@RequestBody JSONObject requestJson){
-        return orderService.updateItemNum(requestJson);
-    }
 
 
 }

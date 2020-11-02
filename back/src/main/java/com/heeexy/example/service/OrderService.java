@@ -7,11 +7,11 @@ import java.util.List;
 public interface OrderService {
 
 
-    JSONObject loadOrders(String username);
+    JSONObject loadCart(String userTicket);
 
     //JSONObject updatePayType(JSONObject requestJson);
 
     JSONObject submitOrder(JSONObject requestJson,String username);
 
-    JSONObject updateItemNum(JSONObject requestJson);
+    JSONObject updateItemNum(JSONObject requestJson,String userTicket);
 }

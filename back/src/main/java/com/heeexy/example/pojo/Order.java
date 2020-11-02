@@ -6,16 +6,18 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 @Data
 @TableName("dc_order")
 @Accessors(chain = true)
 public class Order extends BasePojo{
 
     private OrderUser orderUser;
-    private  OrderItem orderItem;
+    private List<OrderItem> orderItems;
 
     @TableId
-    private Integer orderId;
+    private Long orderId;
 
     @TableField(exist = false)
     private String orderNum;
@@ -24,7 +26,7 @@ public class Order extends BasePojo{
     private String orderInfo;
     private String orderPayType;
     private Integer orderState;
-    private Integer orderItemId;
-    private Integer orderUserId;
+    private Long orderItemId;
+    private Long orderUserId;
     private Integer deleteState;
 }

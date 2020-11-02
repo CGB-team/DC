@@ -6,24 +6,19 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 @Data
-@TableName("dc_order_userinfo")
+@TableName("dc_cart")
 @Accessors(chain = true)
-public class OrderUser extends BasePojo {
-
+public class Cart extends BasePojo{
     @TableId
-    private Long ouId;
-
-    private Long storeId;
+    private Long cartId;
 
     private Long userId;
+    private Long itemId;
 
-    private String userAddr;
-
-    private String userName;
-
-    private String userTel;
-
-
-
+    private String itemName;
+    private String itemInfo;
+    private Long itemPrice;
+    private Integer itemNum;
+    private Integer deleteState;
 
 }

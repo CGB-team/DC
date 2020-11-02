@@ -11,4 +11,5 @@ public interface OrderDao extends BaseMapper<Order> {
 
     int updatePayType(@Param("orderId") Integer orderId, @Param("orderPayType") String orderPayType);
 
+
 }

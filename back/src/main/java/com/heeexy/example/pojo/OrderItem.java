@@ -11,15 +11,17 @@ import lombok.experimental.Accessors;
 public class OrderItem extends BasePojo {
 
     @TableId
-    private Integer otId;
+    private Long otId;
 
-    private Integer itemId;
+    private Long itemId;
 
     private String itemName;
 
-    private Integer itemPrice;
+    private Long itemPrice;
 
     private Integer itemNum;
+
+    private String orderNum;
 
 
 
