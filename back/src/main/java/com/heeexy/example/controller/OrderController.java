@@ -44,6 +44,11 @@ public class OrderController {
         return orderService.submitOrder(requestJson,username);
     }
 
+    @PostMapping("/totalPrice")
+    public JSONObject totalPrice(){
+        return orderService.totalPrice();
+    }
+
 
 
 }

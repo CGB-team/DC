@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -37,7 +38,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public JSONObject loadCart(String userTicket) {
         String wait_id = "在sys_user里找到跟dc_user关联的字段";
-        Long user_id = 1L; //从dc_user对象中找到user_id
+        Long user_id = 2232L; //从dc_user对象中找到user_id
         QueryWrapper<Cart> qw = new QueryWrapper<>();
         qw.eq("user_id",user_id);
         List<Cart> carts = cartDao.selectList(qw);
@@ -56,7 +57,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public JSONObject updateItemNum(JSONObject requestJson,String userTicket) {
         String wait_id = "在sys_user里找到跟dc_user关联的字段";
-        Long user_id = 1L; //从dc_user对象中找到user_id
+        Long user_id = 2232L; //从dc_user对象中找到user_id
         cartDao.updateItemNum(requestJson);
         Long itemId = requestJson.getLong("item_id");
         QueryWrapper<Cart> qw = new QueryWrapper<>();
@@ -66,15 +67,16 @@ public class OrderServiceImpl implements OrderService {
         return CommonUtil.successJson(total);
     }
 
-
     @Override
     public JSONObject submitOrder(JSONObject requestJson,String username) {
         String wait_id = "在sys_user里找到跟dc_user关联的字段";
-        Long user_id = 1L; //从dc_user对象中找到user_id
+        Long user_id = 2232L; //从dc_user对象中找到user_id
         Order order = new Order();
         order.setOrderUserId(user_id);
         String orderNum = user_id+""+System.currentTimeMillis();
         order.setOrderNum(orderNum);
+        Integer orderTotal = (int)(requestJson.getDouble("cart_total")*100);
+        order.setOrderTotal(orderTotal);
         orderDao.insert(order);
 
         JSONArray cartsArr = requestJson.getJSONArray("cartList");
@@ -84,7 +86,7 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setItemId(cartTemp.getItemId());
             orderItem.setItemName(cartTemp.getItemName());
             orderItem.setItemNum(cartTemp.getItemNum());
-            orderItem.setItemPrice(cartTemp.getItemPrice());
+            orderItem.setItemPrice(cartTemp.getItemPrice()*100);
             orderItem.setOrderNum(orderNum);
             orderItemDao.insert(orderItem);
         }
@@ -95,4 +97,18 @@ public class OrderServiceImpl implements OrderService {
         return CommonUtil.successJson(order);
     }
 
+    @Override
+    public JSONObject totalPrice() {
+        Long total = 0L;
+        Long user_id = 2232L; //从dc_user对象中找到user_id
+        QueryWrapper<Cart> qw = new QueryWrapper<>();
+        qw.eq("user_id",user_id);
+        List<Cart> carts = cartDao.selectList(qw);
+        for(int i=0; i< carts.size(); i++){
+            Cart cartTemp = carts.get(i);
+            total += cartTemp.getItemPrice()*cartTemp.getItemNum();
+        }
+        System.out.println(total);
+        return CommonUtil.successJson(total);
+    }
 }

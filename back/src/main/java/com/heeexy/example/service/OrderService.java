@@ -14,4 +14,6 @@ public interface OrderService {
     JSONObject submitOrder(JSONObject requestJson,String username);
 
     JSONObject updateItemNum(JSONObject requestJson,String userTicket);
+
+    JSONObject totalPrice();
 }
