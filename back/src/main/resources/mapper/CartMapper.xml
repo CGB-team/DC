@@ -6,8 +6,8 @@
 <update id="updateItemNum">
     UPDATE dc_cart
     SET
-    item_num = #{item_num}
-    WHERE item_id = #{item_id}
+    item_num = #{itemNum}
+    WHERE item_id = #{itemId}
 </update>
 
 </mapper>

@@ -18,9 +18,7 @@ import com.heeexy.example.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -58,8 +56,9 @@ public class OrderServiceImpl implements OrderService {
     public JSONObject updateItemNum(JSONObject requestJson,String userTicket) {
         String wait_id = "在sys_user里找到跟dc_user关联的字段";
         Long user_id = 2232L; //从dc_user对象中找到user_id
-        cartDao.updateItemNum(requestJson);
-        Long itemId = requestJson.getLong("item_id");
+        Long itemId = requestJson.getLong("itemId");
+        Integer itemNum = requestJson.getInteger("itemNum");
+        cartDao.updateItemNum(itemId,itemNum);
         QueryWrapper<Cart> qw = new QueryWrapper<>();
         qw.eq("item_id", itemId);
         Cart cart = cartDao.selectOne(qw);
@@ -75,24 +74,28 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderUserId(user_id);
         String orderNum = user_id+""+System.currentTimeMillis();
         order.setOrderNum(orderNum);
-        Integer orderTotal = (int)(requestJson.getDouble("cart_total")*100);
+        Integer orderTotal = requestJson.getInteger("cartTotal");
         order.setOrderTotal(orderTotal);
+        String orderPayType = requestJson.getString("orderPaytype");
+        order.setOrderPayType(orderPayType);
         orderDao.insert(order);
 
-        JSONArray cartsArr = requestJson.getJSONArray("cartList");
-        for(int i=0; i< cartsArr.size(); i++){
-            Cart cartTemp = (Cart) cartsArr.get(i);
+        QueryWrapper<Cart> qw1 = new QueryWrapper<>();
+        qw1.eq("user_id",user_id);
+        List<Cart> carts = cartDao.selectList(qw1);
+        for(Cart cart:carts){
             OrderItem orderItem = new OrderItem();
-            orderItem.setItemId(cartTemp.getItemId());
-            orderItem.setItemName(cartTemp.getItemName());
-            orderItem.setItemNum(cartTemp.getItemNum());
-            orderItem.setItemPrice(cartTemp.getItemPrice()*100);
+            orderItem.setItemId(cart.getItemId());
+            orderItem.setItemName(cart.getItemName());
+            orderItem.setItemPrice(cart.getItemPrice());
+            orderItem.setItemNum(cart.getItemNum());
             orderItem.setOrderNum(orderNum);
             orderItemDao.insert(orderItem);
         }
-        QueryWrapper<OrderItem> qw = new QueryWrapper<>();
-        qw.eq("order_num",orderNum);
-        List<OrderItem> orderItems = orderItemDao.selectList(qw);
+
+        QueryWrapper<OrderItem> qw2 = new QueryWrapper<>();
+        qw2.eq("order_num",orderNum);
+        List<OrderItem> orderItems = orderItemDao.selectList(qw2);
         order.setOrderItems(orderItems);
         return CommonUtil.successJson(order);
     }
@@ -108,7 +111,6 @@ public class OrderServiceImpl implements OrderService {
             Cart cartTemp = carts.get(i);
             total += cartTemp.getItemPrice()*cartTemp.getItemNum();
         }
-        System.out.println(total);
         return CommonUtil.successJson(total);
     }
 }
