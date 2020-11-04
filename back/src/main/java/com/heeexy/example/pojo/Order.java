@@ -19,12 +19,11 @@ public class Order extends BasePojo{
     @TableId
     private Long orderId;
 
-    @TableField(exist = false)
-    private String orderNum;
 
+    private String orderNum;
     private Integer orderTotal;
     private String orderInfo;
-    private String orderPayType;
+    private String orderPaytype;
     private Integer orderState;
     private Long orderItemId;
     private Long orderUserId;

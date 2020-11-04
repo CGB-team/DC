@@ -43,15 +43,6 @@ public class OrderServiceImpl implements OrderService {
         return CommonUtil.successJson(carts);
     }
 
-   /* @Override
-    public JSONObject updatePayType(JSONObject requestJson) {
-        String orderPayType = requestJson.getString("order_paytype");
-        String orderNum = requestJson.getString("order_num");
-        orderDao.updatePayType(orderNum,orderPayType);
-        return CommonUtil.successJson();
-
-    }*/
-
     @Override
     public JSONObject updateItemNum(JSONObject requestJson,String userTicket) {
         String wait_id = "在sys_user里找到跟dc_user关联的字段";
@@ -73,11 +64,12 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setOrderUserId(user_id);
         String orderNum = user_id+""+System.currentTimeMillis();
+        System.out.println(orderNum);
         order.setOrderNum(orderNum);
         Integer orderTotal = requestJson.getInteger("cartTotal");
         order.setOrderTotal(orderTotal);
         String orderPayType = requestJson.getString("orderPaytype");
-        order.setOrderPayType(orderPayType);
+        order.setOrderPaytype(orderPayType);
         orderDao.insert(order);
 
         QueryWrapper<Cart> qw1 = new QueryWrapper<>();

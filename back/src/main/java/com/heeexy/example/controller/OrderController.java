@@ -2,6 +2,7 @@ package com.heeexy.example.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.heeexy.example.service.OrderService;
+import com.heeexy.example.util.CommonUtil;
 import com.heeexy.example.util.constants.Constants;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
@@ -22,11 +23,6 @@ public class OrderController {
         return orderService.loadCart(userTicket);
     }
 
-   /* @PostMapping("/updatePayType")
-    public JSONObject updatePayType(@RequestBody JSONObject requestJson){
-        return orderService.updatePayType(requestJson);
-    }*/
-
     @PostMapping("/updateItemNum")
     public JSONObject updateItemNum(@RequestBody JSONObject requestJson){
         Session session = SecurityUtils.getSubject().getSession();
@@ -35,12 +31,12 @@ public class OrderController {
         return orderService.updateItemNum(requestJson,userTicket);
     }
 
-
     @PostMapping("/submitOrder")
     public JSONObject submitOrder(@RequestBody JSONObject requestJson){
         Session session = SecurityUtils.getSubject().getSession();
         JSONObject userInfo = (JSONObject) session.getAttribute(Constants.SESSION_USER_INFO);
         String username = userInfo.getString("username");
+        CommonUtil.hasAllRequired(requestJson, "cartTotal,orderPaytype");
         return orderService.submitOrder(requestJson,username);
     }
 
